@@ -9,9 +9,9 @@ class LegalFileStructure:
         self.content = {}
 
         # State variables
-        self.__last_item = None
-        self.__current_item = None
-        self.__stack = []
+        self._last_item = None
+        self._current_item = None
+        self._stack = []
 
     def write_file(self, fname) -> None:
         with open(fname, "w", encoding="utf-8") as f:
@@ -21,50 +21,51 @@ class LegalFileStructure:
         if not isinstance(item, LegalDocItem):
             raise ValueError(f"invalid type {item}")
 
-        self.__last_item = self.__current_item
-        self.__current_item = item
-        if self.__last_item is None:
-            if self.__current_item is not None:
+        self._last_item = self._current_item
+        self._current_item = item
+        if self._last_item is None:
+            if self._current_item is not None:
                 # Initial state
-                self.__stack.append(item.itemtype)
+                self._stack.append(item.itemtype)
                 self.content["level"] = item.itemtype.name
                 self.content["items"] = [
                     {"text": item.text, "enum": item.enumeration, "content": {}}
                 ]
             return
         else:
-            self.__calculate_state()
-            self.__update()
+            self._calculate_state()
+            self._update()
 
-    def __calculate_state(self):
+    def _calculate_state(self):
         # State machine
-        last_item = self.__last_item.itemtype
-        current_item = self.__current_item.itemtype
+        last_item = self._last_item.itemtype
+        current_item = self._current_item.itemtype
 
         if last_item.value < current_item.value:
             # Current item is a child of last item
-            self.__stack.append(current_item)
+            self._stack.append(current_item)
         elif last_item.value > current_item.value:
             # Find a node in the same level
-            while self.__stack[-1].value > current_item.value:
-                self.__stack.pop()
+            while self._stack[-1].value > current_item.value:
+                self._stack.pop()
 
-    def __update(self):
-        content = self.content["items"][-1]["content"]
-        for i in range(len(self.__stack) - 2):
-            content = content["items"][-1]["content"]
+    def _update(self):
+        item_list = self.content["items"]
+        for i in range(len(self._stack) - 1):
+            content = item_list[-1]["content"]
+            if not content:
+                # An item will be expanded
+                content["level"] = self._current_item.itemtype.name
+                content["items"] = []
+
+            item_list = content["items"]
 
         item_dict = {
-            "text": self.__current_item.text,
-            "enum": self.__current_item.enumeration,
+            "text": self._current_item.text,
+            "enum": self._current_item.enumeration,
         }
-        # Item of type ARTICULO don't have 'items' nor 'content'
-        if self.__current_item.itemtype != ItemType.ARTICULO:
-            item_dict["items"] = []
+        # Articles have no content
+        if self._current_item.itemtype != ItemType.ARTICULO:
             item_dict["content"] = {}
 
-        if not content:
-            content["level"] = self.__current_item.itemtype.name
-            content["items"] = [item_dict]
-        else:
-            content["items"].append(item_dict)
+        item_list.append(item_dict)
