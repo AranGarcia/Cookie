@@ -10,10 +10,10 @@ class ItemType(Enum):
 
 
 # Patterns
-tit_pattern = re.compile(r"^TÍTULO (.+?) - (.+)$")
-cap_pattern = re.compile(r"^CAPÍTULO (.+?) - (.+?)$")
-sec_pattern = re.compile(r"^SECCIÓN (.+?) - (.+?)$")
-art_pattern = re.compile(r"^Artículo (\d+?)\. (.+)$")
+tit_pattern = re.compile(r"^(Título|TÍTULO) (.+?) - (.+)$")
+cap_pattern = re.compile(r"^(Capítulo|CAPÍTULO) (.+?) - (.+?)$")
+sec_pattern = re.compile(r"^(Sección|SECCIÓN) (.+?) - (.+?)$")
+art_pattern = re.compile(r"^(Artículo|ARTÍCULO) (\d+?) - (.+)$")
 
 
 def identify_item(text: str) -> ItemType:
@@ -23,19 +23,19 @@ def identify_item(text: str) -> ItemType:
     (ItemType, enumeration, text)"""
     item_match = tit_pattern.match(text)
     if item_match:
-        return LegalDocItem(ItemType.TITULO, *item_match.groups())
+        return LegalDocItem(ItemType.TITULO, *item_match.groups()[1:])
 
     item_match = cap_pattern.match(text)
     if item_match:
-        return LegalDocItem(ItemType.CAPITULO, *item_match.groups())
+        return LegalDocItem(ItemType.CAPITULO, *item_match.groups()[1:])
 
     item_match = sec_pattern.match(text)
     if item_match:
-        return LegalDocItem(ItemType.SECCION, *item_match.groups())
+        return LegalDocItem(ItemType.SECCION, *item_match.groups()[1:])
 
     item_match = art_pattern.match(text)
     if item_match:
-        return LegalDocItem(ItemType.ARTICULO, *item_match.groups())
+        return LegalDocItem(ItemType.ARTICULO, *item_match.groups()[1:])
 
     return None
 
@@ -44,4 +44,7 @@ class LegalDocItem:
     def __init__(self, itemtype, enumeration, text):
         self.itemtype = itemtype
         self.enumeration = enumeration
-        self.text = text
+        if itemtype != ItemType.ARTICULO:
+            self.text = text.title()
+        else:
+            self.text = text.title()
