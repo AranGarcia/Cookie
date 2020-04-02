@@ -21,7 +21,6 @@ import sys
 
 # Spacy
 import spacy
-from spacy.lang.es.stop_words import STOP_WORDS
 
 # YAML
 from yaml import Dumper, Loader, dump, load
