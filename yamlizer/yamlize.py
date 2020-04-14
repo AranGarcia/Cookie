@@ -10,11 +10,21 @@ if len(sys.argv) < 2 or len(sys.argv) > 3:
 
 fname = sys.argv[1]
 lfs = LegalFileStructure()
+paragraphs = []
 with open(fname) as input_file:
     for line in input_file:
-        item = identify_item(line)
-        if item:
-            lfs.add_item(item)
+        # Remove trailing whitespace.
+        line = line.strip()
+
+        # Parse all paragraphs as a single item
+        if line != "":
+            paragraphs.append(line)
+        else:
+            text = "\n".join(paragraphs)
+            paragraphs.clear()
+            item = identify_item(text)
+            if item:
+                lfs.add_item(item)
 
 if len(sys.argv) == 3:
     outfile = sys.argv[2]

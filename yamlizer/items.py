@@ -13,7 +13,8 @@ class ItemType(Enum):
 tit_pattern = re.compile(r"^(Título|TÍTULO) (.+?) - (.+)$")
 cap_pattern = re.compile(r"^(Capítulo|CAPÍTULO) (.+?) - (.+?)$")
 sec_pattern = re.compile(r"^(Sección|SECCIÓN) (.+?) - (.+?)$")
-art_pattern = re.compile(r"^(Artículo|ARTÍCULO) (\d+?) - (.+)$")
+# DOTALL in art_pattern is to match paragraphs
+art_pattern = re.compile(r"^(Artículo|ARTÍCULO) (\d+?) - (.+)$", re.DOTALL)
 
 
 def identify_item(text: str) -> ItemType:
