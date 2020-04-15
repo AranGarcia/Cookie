@@ -1,3 +1,7 @@
+"""
+Preprocessing script that transforms Shepard unstructured legal TXT files from
+unstructured TXT to a YAML format.
+"""
 import sys
 
 from handler import LegalFileStructure
