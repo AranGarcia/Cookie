@@ -23,7 +23,7 @@ import sys
 import spacy
 
 # YAML
-from yaml import Dumper, Loader, dump, load
+from yaml import Loader, dump, load
 
 if len(sys.argv) < 2:
     print("Usage\n\trun.py FILE [DEST]")
