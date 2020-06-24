@@ -2,6 +2,34 @@ from enum import Enum
 import re
 
 
+# Load lemma dictionary
+ENUMERATION_LEMMAS = dict()
+with open("enumeration-lemmas.txt") as f:
+    for i, line in enumerate(f):
+        words = line.split(maxsplit=1)
+        if len(words) < 2:
+            raise ValueError(f"Invalid file: enumeration-lemmas.txt, line {i}.")
+        if words[1] in ENUMERATION_LEMMAS:
+            raise ValueError(f"Duplicate word: {words [1]}, line {i}.")
+        ENUMERATION_LEMMAS[words[1]] = words[0]
+
+ROMAN_NUMERALS = {
+    "I": 1,
+    "V": 5,
+    "X": 10,
+    "L": 50,
+    "C": 100,
+    "D": 500,
+    "M": 1000,
+    "IV": 4,
+    "IX": 9,
+    "XL": 40,
+    "XC": 90,
+    "CD": 400,
+    "CM": 900,
+}
+
+
 class ItemType(Enum):
     TITULO = 1
     CAPITULO = 2
@@ -42,10 +70,50 @@ def identify_item(text: str) -> ItemType:
 
 
 class LegalDocItem:
+    __roman_numeral_regex = re.compile(
+        r"^M{0,4}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})$"
+    )
+
     def __init__(self, itemtype, enumeration, text):
         self.itemtype = itemtype
-        self.enumeration = enumeration
+        self.enumeration = self.__enumeration_to_int(enumeration)
         if itemtype != ItemType.ARTICULO:
             self.text = text
         else:
             self.text = text.title()
+
+    @classmethod
+    def __roman_to_int(cls, roman_numeral_string):
+        roman_numeral_string = roman_numeral_string.upper()
+
+        if not cls.__roman_numeral_regex.match(roman_numeral_string):
+            return None
+
+        i = 0
+        num = 0
+        while i < len(roman_numeral_string):
+            if (
+                i + 1 < len(roman_numeral_string)
+                and roman_numeral_string[i : i + 2] in ROMAN_NUMERALS
+            ):
+                num += ROMAN_NUMERALS[roman_numeral_string[i : i + 2]]
+                i += 2
+            else:
+                # print(i)
+                num += ROMAN_NUMERALS[roman_numeral_string[i]]
+                i += 1
+        return num
+
+    @classmethod
+    def __enumeration_to_int(cls, enumeration_string):
+        # First try to transform from roman numeral
+        num = cls.__roman_to_int(enumeration_string)
+        if num is not None:
+            return num
+
+        # Transform to lower case
+        enumeration_string = enumeration_string.lower()
+        if enumeration_string.isdecimal():
+            return int(enumeration_string)
+        else:
+            return ENUMERATION_LEMMAS[enumeration_string]
