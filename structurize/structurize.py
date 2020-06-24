@@ -9,7 +9,7 @@ from items import identify_item
 
 # Input argument: file to be parsed
 if len(sys.argv) < 2 or len(sys.argv) > 3:
-    print("Usage\n\tyamlize.py FILE [OUTPUT_FILE]\n", file=sys.stderr)
+    print("Usage\n\tstructurize.py FILE [OUTPUT_FILE]\n", file=sys.stderr)
     exit(1)
 
 fname = sys.argv[1]
@@ -30,10 +30,8 @@ with open(fname) as input_file:
             if item:
                 lfs.add_item(item)
 
-if len(sys.argv) == 3:
-    outfile = sys.argv[2]
-    if not outfile.endswith(".yaml"):
-        outfile += ".yaml"
+if len(sys.argv) < 3:
+    outfile = "result"
 else:
-    outfile = "result.yaml"
-lfs.write_file(outfile)
+    outfile = sys.argv[2]
+lfs.write_file(outfile, file_format="json")

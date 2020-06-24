@@ -46,6 +46,6 @@ class LegalDocItem:
         self.itemtype = itemtype
         self.enumeration = enumeration
         if itemtype != ItemType.ARTICULO:
-            self.text = text.title()
+            self.text = text
         else:
             self.text = text.title()

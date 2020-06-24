@@ -1,4 +1,5 @@
 # Module for parsing Legal documents
+import json
 import yaml
 
 from items import ItemType, LegalDocItem
@@ -13,9 +14,17 @@ class LegalFileStructure:
         self._current_item = None
         self._stack = []
 
-    def write_file(self, fname) -> None:
-        with open(fname, "w", encoding="utf-8") as f:
-            yaml.dump(self.content, stream=f, encoding="utf-8", allow_unicode=True)
+    def write_file(self, fname, file_format) -> None:
+        if file_format == "yaml":
+            fname = f"{fname}.yaml"
+            with open(fname, "w", encoding="utf-8") as f:
+                yaml.dump(self.content, stream=f, encoding="utf-8", allow_unicode=True)
+        elif file_format == "json":
+            fname = f"{fname}.json"
+            with open(fname, "w", encoding="utf-8") as f:
+                json.dump(self.content, f)
+        else:
+            raise ValueError(f"Unrecognized format {format}.")
 
     def add_item(self, item: LegalDocItem) -> None:
         if not isinstance(item, LegalDocItem):
@@ -61,7 +70,7 @@ class LegalFileStructure:
             item_list = content["items"]
 
         item_dict = {
-            "text": self._current_item.text,
+            "text": self._current_item.text.lower(),
             "enum": self._current_item.enumeration,
         }
         # Articles have no content
