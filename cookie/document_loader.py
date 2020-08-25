@@ -8,8 +8,9 @@ import pickle
 # YAML
 from yaml import Loader, load
 
-# Legal document structures
+# Preprocessing packages
 from legal_structures import identify_item, LegalFileStructure
+from word_vectors import load_lemmas
 
 
 class Cookie:
@@ -19,6 +20,15 @@ class Cookie:
     """
 
     VALID_DOC_FORMATS = {"json", "yaml"}
+
+    @classmethod
+    def load_data(cls):
+        """Loads all necessary data for Milo to work.
+
+        This method prepares and loads the following data:
+        - word vectors:
+        """\
+        cls.__load_clusters()
 
     @classmethod
     def structurize_txt(cls, fname: str, output_format: str = "json"):
@@ -70,3 +80,10 @@ class Cookie:
     @classmethod
     def __load_yaml(fobj):
         return load(fobj, Loader=Loader)
+
+    @staticmethod
+    def __load_clusters(fname: str, k: int = 10_000):
+        """Reads a file with lemmas and groups them into 10,000 new cluster centers."""
+        
+        # First load lemmas
+        lemmas = load_lemmas(fname)
